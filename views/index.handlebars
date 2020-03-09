@@ -1,0 +1,95 @@
+<h1>Note Taker</h1>
+
+<ul>
+  {{#each notes}}
+  <li>
+    <p>
+      {{this.id}}. {{this.note}}
+
+      <button data-noteid="{{this.id}}" class="delnote">Delete note!</button>
+    </p>
+  </li>
+  {{/each}}
+</ul>
+
+<h2>Create a note</h2>
+<form id="createnote" class="button-size">
+  <textarea type="text" name="note"></textarea>
+  <button type="submit">Save note!</button>
+</form>
+
+<h2>Update a note</h2>
+<form id="updatenote" class="button-size">
+  <select name="id">
+		{{#each notes}}
+			<option value="{{this.id}}">{{this.note}}</option>
+		{{/each}}
+	</select>
+  <textarea type="text" name="note" placeholder="note"></textarea>
+  <button type="submit">Update note!</button>
+</form>
+
+<script type="text/javascript">
+  $(".delnote").on("click", function(event) {
+    // Get the ID from the button.
+    // This is shorthand for $(this).attr("data-noteid")
+    var id = $(this).data("noteid");
+
+    // Send the DELETE request.
+    $.ajax("/api/notes/" + id, {
+      type: "DELETE"
+    }).then(
+      function() {
+        console.log("deleted id ", id);
+        // Reload the page to get the updated list
+        location.reload();
+      }
+    );
+  });
+
+  $("#createnote").on("submit", function(event) {
+    // Make sure to preventDefault on a submit event.
+    event.preventDefault();
+
+    // [name=note] will find an element with a "name" attribute equal to the string "note"
+    var newnote = {
+      note: $("#createnote [name=note]").val().trim()
+    };
+
+    // Send the POST request.
+    $.ajax("/api/notes", {
+      type: "POST",
+      data: newnote
+    }).then(
+      function() {
+        console.log("created new note");
+        // Reload the page to get the updated list
+        location.reload();
+      }
+    );
+  });
+
+  $("#updatenote").on("submit", function(event) {
+    // Make sure to preventDefault on a submit event.
+    event.preventDefault();
+
+    // Get the ID by finding an element with a "name" attribute equal to the string "id"
+    var id = $("[name=id]").val().trim();
+
+    var updatednote = {
+      note: $("#updatenote [name=note]").val().trim()
+    };
+
+    // Send the PUT request.
+    $.ajax("/api/notes/" + id, {
+      type: "PUT",
+      data: updatednote
+    }).then(
+      function() {
+        console.log("updated id ", id);
+        // Reload the page to get the updated list
+        location.reload();
+      }
+    );
+  });
+</script>
